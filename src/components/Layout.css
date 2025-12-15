@@ -1,0 +1,21 @@
+/* Layout Styles - Bottom Nav Design */
+
+.app-layout {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+    padding-bottom: calc(80px + var(--safe-area-bottom));
+    overflow-y: auto;
+}
+
+/* Ensure content doesn't go behind bottom nav */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .main-content {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+}

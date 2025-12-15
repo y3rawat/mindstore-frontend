@@ -1,0 +1,106 @@
+/* Bottom Navigation Styles */
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--color-border);
+    z-index: 100;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.bottom-nav-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 64px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.nav-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    height: 100%;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    gap: 4px;
+}
+
+.nav-button:hover {
+    color: var(--color-primary);
+}
+
+.nav-button.active {
+    color: var(--color-primary);
+}
+
+.nav-button .material-icons-round {
+    font-size: 24px;
+}
+
+.nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* FAB Button */
+.fab-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    margin-top: -32px;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.fab-circle {
+    width: 56px;
+    height: 56px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-glow), var(--shadow-md);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.fab-circle:hover {
+    transform: scale(1.05);
+}
+
+.fab-circle:active {
+    transform: scale(0.95);
+}
+
+.fab-circle .material-icons-round {
+    font-size: 28px;
+    color: white;
+}
+
+/* Safe area for devices with home indicator */
+.bottom-nav-safe-area {
+    height: var(--safe-area-bottom);
+    background: var(--color-bg-surface);
+}
+
+/* Desktop adjustments */
+@media (min-width: 768px) {
+    .bottom-nav-container {
+        max-width: 400px;
+    }
+}

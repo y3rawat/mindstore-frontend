@@ -1,0 +1,230 @@
+/* Settings Page Styles */
+
+.settings {
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+.settings-content {
+    padding: 16px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Section */
+.settings-section {
+    margin-bottom: 24px;
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    margin-left: 8px;
+}
+
+/* Settings Card */
+.settings-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* Setting Item */
+.setting-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item.clickable {
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.setting-item.clickable:hover {
+    background: var(--color-bg-hover);
+}
+
+.setting-item.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Setting Icon */
+.setting-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.setting-icon .material-icons-round {
+    font-size: 20px;
+}
+
+.setting-icon.green {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--color-synced);
+}
+
+.setting-icon.purple {
+    background: rgba(147, 51, 234, 0.15);
+    color: #a855f7;
+}
+
+.setting-icon.red {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--color-error);
+}
+
+.setting-icon.orange {
+    background: rgba(234, 179, 8, 0.15);
+    color: var(--color-processing);
+}
+
+.setting-icon.blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--color-local);
+}
+
+.setting-icon.gray {
+    background: var(--color-bg-hover);
+    color: var(--color-text-muted);
+}
+
+/* Setting Info */
+.setting-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.setting-info h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.setting-info p {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}
+
+.setting-info .text-error {
+    color: var(--color-error);
+}
+
+/* Setting Value */
+.setting-value {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+.chevron {
+    color: var(--color-text-muted);
+    font-size: 18px;
+}
+
+/* Toggle Switch */
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--color-bg-hover);
+    border-radius: 28px;
+    transition: all var(--transition-fast);
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle input:checked+.toggle-slider {
+    background: var(--color-primary);
+}
+
+.toggle input:checked+.toggle-slider::before {
+    transform: translateX(20px);
+}
+
+/* Input Section */
+.setting-input-section {
+    padding: 16px;
+    background: var(--color-bg-surface);
+    border-top: 1px solid var(--color-border);
+}
+
+.input-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon .material-icons-round {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--color-text-muted);
+}
+
+.input-with-icon .input {
+    padding-left: 40px;
+}
+
+/* Footer */
+.settings-footer {
+    text-align: center;
+    padding: 24px 16px 32px;
+    color: var(--color-text-muted);
+}
+
+.settings-footer p {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
