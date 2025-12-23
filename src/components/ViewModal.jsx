@@ -50,29 +50,44 @@ export default function ViewModal({ media, onClose }) {
     const isVideoContent = inferVideoType();
 
     // Helper to get actual viewable Drive URL (not thumbnail)
-    const getActualDriveUrl = (item, forceVideo = false) => {
+    const getActualDriveUrl = (item) => {
         const fileId = item.driveFileId || extractDriveFileId(item.driveViewLink);
-        if (!fileId) return item.thumbnailUrl || item.url;
-
-        // For videos, use embed iframe
-        if (item.mediaType === 'video' || forceVideo) {
-            return `https://drive.google.com/file/d/${fileId}/preview`;
+        if (fileId) {
+            // For videos, use embed iframe
+            if (item.mediaType === 'video') {
+                return `https://drive.google.com/file/d/${fileId}/preview`;
+            }
+            // For images, use large thumbnail (uc?export=view has CORS issues)
+            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920`;
         }
-        // For images, use large thumbnail (uc?export=view has CORS issues)
-        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920`;
+        // Fallback to any available URL
+        return item.thumbnailUrl || item.url || null;
     };
 
     // Build gallery from mediaItems with actual Drive content URLs
     const galleryImages = (() => {
+        // Debug log
+        console.log('🖼️ ViewModal media:', {
+            hasMediaItems: !!media.mediaItems,
+            mediaItemsCount: media.mediaItems?.length,
+            driveFileId,
+            thumbnailUrl: media.thumbnailUrl
+        });
+
         if (media.mediaItems && Array.isArray(media.mediaItems) && media.mediaItems.length > 0) {
-            return media.mediaItems.map(item => {
+            return media.mediaItems.map((item, idx) => {
                 const fileId = item.driveFileId || extractDriveFileId(item.driveViewLink);
                 const itemIsVideo = item.mediaType === 'video';
+                const url = getActualDriveUrl(item);
+
+                console.log(`  Item ${idx + 1}:`, { fileId, url: url?.substring(0, 50), type: item.mediaType });
+
                 return {
-                    url: getActualDriveUrl(item),
+                    url: url,
                     driveId: fileId,
                     type: item.mediaType || 'image',
-                    isVideo: itemIsVideo
+                    isVideo: itemIsVideo,
+                    notSynced: !fileId
                 };
             });
         }
@@ -81,7 +96,7 @@ export default function ViewModal({ media, onClose }) {
             return [{
                 url: isVideoContent
                     ? `https://drive.google.com/file/d/${driveFileId}/preview`
-                    : `https://drive.google.com/uc?export=view&id=${driveFileId}`,
+                    : `https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1920`,
                 driveId: driveFileId,
                 type: isVideoContent ? 'video' : 'image',
                 isVideo: isVideoContent
@@ -163,14 +178,33 @@ export default function ViewModal({ media, onClose }) {
                                     <p>Video syncing to Drive...</p>
                                 </div>
                             </div>
-                        ) : (
-                            // Image: Show directly
+                        ) : currentImage.url ? (
+                            // Image with URL: Show directly
                             <img
                                 src={currentImage.url}
                                 alt={media.title || 'Image'}
                                 className="view-modal-image"
                                 key={currentImageIndex}
                             />
+                        ) : (
+                            // Image without URL (not synced yet)
+                            <div className="view-modal-pending">
+                                {media.thumbnailUrl ? (
+                                    <img
+                                        src={media.thumbnailUrl}
+                                        alt={media.title || 'Carousel thumbnail'}
+                                        className="view-modal-image pending"
+                                    />
+                                ) : (
+                                    <div className="view-modal-placeholder">
+                                        <span className="material-icons-round">photo_library</span>
+                                    </div>
+                                )}
+                                <div className="pending-overlay">
+                                    <span className="material-icons-round">sync</span>
+                                    <p>Image {currentImageIndex + 1} syncing...</p>
+                                </div>
+                            </div>
                         )
                     ) : (
                         <div className="view-modal-placeholder">
@@ -227,6 +261,15 @@ export default function ViewModal({ media, onClose }) {
                     )}
                     {media.caption && (
                         <p className="view-modal-caption">{media.caption}</p>
+                    )}
+
+                    {/* Original URL - show as text */}
+                    {sourceUrl && (
+                        <p className="view-modal-url font-mono">
+                            <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+                                {sourceUrl.length > 60 ? sourceUrl.substring(0, 60) + '...' : sourceUrl}
+                            </a>
+                        </p>
                     )}
 
                     {/* Action buttons */}

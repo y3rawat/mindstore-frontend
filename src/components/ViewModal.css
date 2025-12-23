@@ -292,6 +292,22 @@
     line-height: 1.6;
 }
 
+.view-modal-url {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0 0 12px;
+    word-break: break-all;
+}
+
+.view-modal-url a {
+    color: var(--color-primary, #00d9ff);
+    text-decoration: none;
+}
+
+.view-modal-url a:hover {
+    text-decoration: underline;
+}
+
 /* Action buttons */
 .view-modal-actions {
     display: flex;
