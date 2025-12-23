@@ -2,7 +2,7 @@
  * Auth-related API endpoints
  */
 
-import { get, post } from './client';
+import { get, post, del } from './client';
 
 /**
  * Fetch user usage stats
@@ -14,16 +14,35 @@ export async function fetchUserUsage(userId) {
 }
 
 /**
- * Update user tier (upgrade/downgrade)
+ * Generate a new API key for external access
  * @param {string} userId - Firebase user ID
- * @param {string} tier - New tier ('free' or 'paid')
+ * @returns {Promise<object>} - { success, apiKey }
+ */
+export async function generateApiKey(userId) {
+    return post(`/auth/api-key/${userId}`);
+}
+
+/**
+ * Get existing API key
+ * @param {string} userId - Firebase user ID
+ * @returns {Promise<object>} - { success, hasApiKey, apiKey }
+ */
+export async function getApiKey(userId) {
+    return get(`/auth/api-key/${userId}`);
+}
+
+/**
+ * Revoke API key
+ * @param {string} userId - Firebase user ID
  * @returns {Promise<object>} - { success }
  */
-export async function updateUserTier(userId, tier) {
-    return post(`/auth/tier/${userId}`, { tier });
+export async function revokeApiKey(userId) {
+    return del(`/auth/api-key/${userId}`);
 }
 
 export default {
     fetchUserUsage,
-    updateUserTier,
+    generateApiKey,
+    getApiKey,
+    revokeApiKey,
 };

@@ -101,11 +101,18 @@ graph TD
 ### 1.3 Component Architecture
 
 #### ContentCard
-**Purpose**: Universal card component for displaying media items
+**Purpose**: Universal card component for displaying media items with integrated viewing capabilities
 
 **Variants**:
-1. **Grid variant** (default): Used in Library and Dashboard
-2. **Queue variant**: Shows processing status with progress bar
+1. **Grid variant** (default): Used in Library and Dashboard with thumbnail, status badges, and view button
+2. **Queue variant**: Shows processing status with progress bar for items being downloaded
+
+**Key Features**:
+- **Platform Tags**: Color-coded badges (#INSTA, #YOUTUBE, #TWITTER, etc.)
+- **Sync Status**: Shows "SYNCED" badge when content is on Google Drive
+- **View Button**: Opens ViewModal for completed/synced content
+- **Play Overlay**: Video indicator for video content
+- **Selection Mode**: Multi-select for bulk operations
 
 **Data Flow**:
 ```javascript
@@ -119,8 +126,9 @@ item: {
     thumbnailUrl: string,
     driveFileId: string,
     driveViewLink: string,
-    downloadStatus: 'pending' | 'processing' | 'completed' | 'failed',
-    mediaType: 'video' | 'image' | 'carousel'
+    downloadStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'uploaded',
+    mediaType: 'video' | 'image' | 'carousel',
+    mediaItems: Array<{ driveFileId, mediaType, driveViewLink }> // For carousels
   }
 }
 ```
@@ -129,6 +137,29 @@ item: {
 1. Try platform `thumbnailUrl` (proxied through `/api/image-proxy`)
 2. If missing, use Google Drive auto-generated thumbnail: `https://drive.google.com/thumbnail?id={driveFileId}&sz=w400`
 3. If both missing, show placeholder icon
+
+#### ViewModal
+**Purpose**: Full-screen modal for viewing synced media content
+
+**Key Features**:
+- **Video Player**: Google Drive embedded iframe for video playback
+- **Image Gallery**: Navigation for carousel content with arrow keys support
+- **Mixed Media**: Supports carousels with both videos and images
+- **Metadata Display**: Title, author, caption, platform badge
+- **Action Buttons**: "View Source" (original URL) and "Open in Drive"
+
+**Technical Details**:
+```javascript
+// Video detection logic (when mediaType not set)
+1. Check explicit mediaType === 'video'
+2. Fallback: Check title pattern ("Video by username")
+3. Fallback: Check URL patterns (/reel/, /reels/, /shorts/)
+
+// Gallery navigation
+- Left/Right arrows or click navigation
+- Dot indicators for position
+- Per-item video/image type detection
+```
 
 #### AddModal
 **Purpose**: URL submission interface
@@ -734,7 +765,8 @@ Benefits:
 #### Content Display
 | Component | Purpose | Props |
 |-----------|---------|-------|
-| `ContentCard.jsx` | Media item display | `item`, `isSelected`, `onSelect`, `variant` |
+| `ContentCard.jsx` | Media item card with thumbnails, status badges, and ViewModal integration | `item`, `isSelected`, `onSelect`, `variant` |
+| `ViewModal.jsx` | Full-screen media viewer with video player, image gallery, and navigation | `media`, `onClose` |
 | `AddModal.jsx` | URL submission modal | - (uses context) |
 
 #### Contexts
@@ -888,6 +920,6 @@ PORT=3001
 
 ---
 
-**Last Updated**: December 2024  
-**Version**: 1.0  
+**Last Updated**: December 15, 2024  
+**Version**: 1.1  
 **Author**: MindStore Team

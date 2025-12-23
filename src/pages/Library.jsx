@@ -76,12 +76,12 @@ function Library() {
         return () => window.removeEventListener('mindstore:content-updated', handleContentUpdated)
     }, [fetchContent])
 
-    // Auto-poll when there are pending/processing items
+    // Auto-poll when there are pending/processing/queued items
     useEffect(() => {
         // Check if any items are still processing
         const hasPendingItems = items.some(item => {
             const status = item.media?.downloadStatus
-            return status === 'pending' || status === 'processing'
+            return status === 'pending' || status === 'processing' || status === 'queued'
         })
 
         if (!hasPendingItems || !userId) return

@@ -1,4 +1,6 @@
 import { memo, useState, useMemo } from 'react'
+import { createPortal } from 'react-dom'
+import ViewModal from './ViewModal'
 import './ContentCard.css'
 
 // Proxy URL for images
@@ -37,6 +39,10 @@ function getDriveThumbnailUrl(driveFileId) {
 function getProxiedThumbnailUrl(url, driveFileId) {
     // First try the platform thumbnail URL
     if (url) {
+        // Skip proxy for Drive URLs - they're CORS-enabled
+        if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
+            return url
+        }
         if (isExternalUrl(url)) {
             return `${API_URL}/image-proxy?url=${encodeURIComponent(url)}`
         }
@@ -68,18 +74,9 @@ const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, vari
     const status = media.downloadStatus
 
     const lacksMetadata = !media.thumbnailUrl && !media.driveFileId && !media.title && !media.author
-    const pendingStatuses = new Set([
-        'pending',
-        'processing',
-        'queued',
-        'waiting',
-        'created',
-        'uploading',
-        'drive-uploading',
-        'drive_upload',
-        'drive_pending',
-        'init',
-    ])
+    const queuedStatuses = new Set(['pending', 'queued', 'waiting', 'created', 'init'])
+    const processingStatuses = new Set(['processing', 'uploading', 'drive-uploading', 'drive_upload', 'drive_pending'])
+    const pendingStatuses = new Set([...queuedStatuses, ...processingStatuses])
 
     // Treat undefined/failed-without-metadata as still loading metadata
     const isSoftPending = (!status || status === 'failed' || status === 'error') && lacksMetadata
@@ -87,7 +84,9 @@ const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, vari
     const isFailed = (status === 'failed' || status === 'error') && !isSoftPending
     const isCompleted = status === 'completed' || status === 'uploaded'
     const hasDrive = !!media.driveViewLink
+    const hasDrivePreview = hasDrive || !!media.driveFileId
     const [imageError, setImageError] = useState(false)
+    const [showModal, setShowModal] = useState(false)
 
     const thumbnailUrl = useMemo(() =>
         getProxiedThumbnailUrl(media.thumbnailUrl, media.driveFileId),
@@ -95,6 +94,8 @@ const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, vari
     )
 
     const hasValidThumbnail = thumbnailUrl && !imageError
+
+    const isViewable = (isCompleted || !!media.url) && (hasDrivePreview || hasValidThumbnail || !!media.url)
     // savedAt is from user_content (item level), not media_library (media level)
     const savedAt = item.savedAt?._seconds ? new Date(item.savedAt._seconds * 1000) : item.savedAt
     const formattedDate = savedAt ? new Date(savedAt).toLocaleDateString('en-US', {
@@ -117,8 +118,9 @@ const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, vari
         return `${platformNames[platform] || 'Media'} ${type}`
     }
 
+    const isQueued = queuedStatuses.has(status) || isSoftPending
     const displayTitle = isPending
-        ? 'Processing...'
+        ? (isQueued ? 'In Queue...' : 'Processing...')
         : (media.title || media.author || getPlatformFallbackTitle())
 
     const displayMeta = isPending
@@ -170,7 +172,7 @@ const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, vari
     // Grid variant - default card for synced/downloaded items
     return (
         <div
-            className={`content-card ${isSelected ? 'selected' : ''} ${isFailed ? 'failed' : ''}`}
+            className={`content-card ${isSelected ? 'selected' : ''} ${isFailed ? 'failed' : ''} ${isViewable ? 'is-viewable' : ''}`}
             onClick={onSelect}
         >
             <div
@@ -225,6 +227,20 @@ const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, vari
                         <span className="material-icons-round">error</span>
                     </div>
                 )}
+
+                {/* View button for completed items */}
+                {isViewable && (
+                    <button
+                        className="card-view-btn"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setShowModal(true)
+                        }}
+                        title="View"
+                    >
+                        <span className="material-icons-round">visibility</span>
+                    </button>
+                )}
             </div>
 
             <div className="card-body">
@@ -235,6 +251,12 @@ const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, vari
                     {displayMeta}
                 </p>
             </div>
+
+            {/* ViewModal - rendered in portal */}
+            {showModal && createPortal(
+                <ViewModal media={media} onClose={() => setShowModal(false)} />,
+                document.body
+            )}
         </div>
     )
 })

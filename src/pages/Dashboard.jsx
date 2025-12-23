@@ -52,7 +52,7 @@ function Dashboard() {
     useEffect(() => {
         const hasProcessingItems = items.some(item => {
             const media = item.media || {}
-            return media.downloadStatus === 'pending' || media.downloadStatus === 'processing'
+            return media.downloadStatus === 'pending' || media.downloadStatus === 'processing' || media.downloadStatus === 'queued'
         })
 
         if (hasProcessingItems && user?.id) {
@@ -116,12 +116,11 @@ function Dashboard() {
         }
     }
 
-    // Filter items by status
-    // Processing Queue: items still being processed (pending/processing) or soft-failed without metadata
+    // Processing Queue: items still being processed (pending/processing/queued) or soft-failed without metadata
     const processingItems = useMemo(() => items.filter(item => {
         const media = item.media || {}
         const isSoftPending = media.downloadStatus === 'failed' && !media.thumbnailUrl && !media.driveFileId && !media.title
-        return media.downloadStatus === 'pending' || media.downloadStatus === 'processing' || isSoftPending
+        return media.downloadStatus === 'pending' || media.downloadStatus === 'processing' || media.downloadStatus === 'queued' || isSoftPending
     }), [items])
 
     // Synced Files: items uploaded to Google Drive
@@ -134,7 +133,7 @@ function Dashboard() {
     const allContentItems = useMemo(() => items.filter(item => {
         const media = item.media || {}
         const isSoftPending = media.downloadStatus === 'failed' && !media.thumbnailUrl && !media.driveFileId && !media.title
-        return media.downloadStatus !== 'pending' && media.downloadStatus !== 'processing' && !isSoftPending
+        return media.downloadStatus !== 'pending' && media.downloadStatus !== 'processing' && media.downloadStatus !== 'queued' && !isSoftPending
     }), [items])
 
     // Debug log

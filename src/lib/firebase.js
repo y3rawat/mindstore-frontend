@@ -52,7 +52,7 @@ export function onAuthChange(callback) {
                 id: user.uid,
                 email: user.email,
                 displayName: user.displayName,
-                tier: 'free', // Default tier
+                tier: 'personal',
             };
             localStorage.setItem('mindstore_user', JSON.stringify(userData));
         } else {
