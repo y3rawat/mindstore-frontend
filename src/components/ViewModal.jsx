@@ -28,7 +28,13 @@ export default function ViewModal({ media, onClose }) {
     const isSynced = !!driveFileId || !!media.driveViewLink;
 
     // Image gallery state
+    // Image gallery state
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+    // AI Analysis state
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState(media.visualAnalysis || null);
+    const [analysisError, setAnalysisError] = useState(null);
 
     // Helper: Infer if content is video from title/URL when mediaType is not set
     const inferVideoType = () => {
@@ -139,6 +145,44 @@ export default function ViewModal({ media, onClose }) {
             document.body.style.overflow = ''
         }
     }, [handleKeyDown])
+
+    const handleAnalyzeVideo = async () => {
+        if (!media.id || isAnalyzing) return;
+
+        setIsAnalyzing(true);
+        setAnalysisError(null);
+
+        try {
+            const geminiKey = localStorage.getItem('mindstore_gemini_key');
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            const userId = localStorage.getItem('mindstore_user_id');
+
+            const response = await fetch(`${baseUrl}/api/analyze/video-visual`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-gemini-api-key': geminiKey || ''
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    contentId: media.id
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to analyze video');
+            }
+
+            setAnalysisResult(data.analysis);
+        } catch (error) {
+            console.error('Video Analysis Error:', error);
+            setAnalysisError(error.message);
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
 
     const handleOverlayClick = (e) => {
         if (e.target.classList.contains('view-modal-overlay')) onClose()
@@ -261,6 +305,59 @@ export default function ViewModal({ media, onClose }) {
                     )}
                     {media.caption && (
                         <p className="view-modal-caption">{media.caption}</p>
+                    )}
+
+                    {/* AI Video Analysis Section */}
+                    {isVideoContent && (
+                        <div className="view-modal-ai-section">
+                            <div className="ai-section-header">
+                                <span className="material-icons-round ai-spark-icon">auto_awesome</span>
+                                <h3>AI Video Understanding</h3>
+                                {!analysisResult && !isAnalyzing && (
+                                    <button
+                                        className="ai-analyze-btn"
+                                        onClick={handleAnalyzeVideo}
+                                        disabled={isAnalyzing}
+                                    >
+                                        Analyze Video
+                                    </button>
+                                )}
+                            </div>
+
+                            {isAnalyzing && (
+                                <div className="ai-loading">
+                                    <div className="ai-spinner"></div>
+                                    <p>AI is watching and analyzing the video...</p>
+                                    <span className="ai-loading-subtext">This may take up to 60 seconds</span>
+                                </div>
+                            )}
+
+                            {analysisError && (
+                                <div className="ai-error">
+                                    <span className="material-icons-round">error_outline</span>
+                                    <p>{analysisError}</p>
+                                    <button onClick={handleAnalyzeVideo} className="retry-btn">Retry</button>
+                                </div>
+                            )}
+
+                            {analysisResult && (
+                                <div className="ai-analysis-content">
+                                    <div className="analysis-text">
+                                        {analysisResult.split('\n').map((line, i) => (
+                                            <p key={i}>{line}</p>
+                                        ))}
+                                    </div>
+                                    <button
+                                        className="ai-reanalyze-btn"
+                                        onClick={handleAnalyzeVideo}
+                                        disabled={isAnalyzing}
+                                    >
+                                        <span className="material-icons-round">refresh</span>
+                                        Re-analyze
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     )}
 
                     {/* Original URL - show as text */}
