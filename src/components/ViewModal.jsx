@@ -140,12 +140,38 @@ export default function ViewModal({ media, onClose }) {
                 {/* Media container */}
                 <div className="view-modal-media">
                     {currentImage ? (
-                        <img
-                            src={currentImage.isVideo ? media.thumbnailUrl : currentImage.url}
-                            alt={media.title || (currentImage.isVideo ? 'Video thumbnail' : 'Image')}
-                            className="view-modal-image"
-                            key={currentImageIndex}
-                        />
+                        currentImage.isVideo && currentImage.driveId ? (
+                            // Video: Use iframe embed for inline playback
+                            <iframe
+                                src={`https://drive.google.com/file/d/${currentImage.driveId}/preview`}
+                                className="view-modal-video"
+                                allow="autoplay; encrypted-media"
+                                allowFullScreen
+                                title={media.title || 'Video'}
+                                key={currentImageIndex}
+                            />
+                        ) : currentImage.isVideo && !currentImage.driveId ? (
+                            // Video not synced yet - show thumbnail with message
+                            <div className="view-modal-pending">
+                                <img
+                                    src={media.thumbnailUrl || currentImage.url}
+                                    alt={media.title || 'Video thumbnail'}
+                                    className="view-modal-image pending"
+                                />
+                                <div className="pending-overlay">
+                                    <span className="material-icons-round">sync</span>
+                                    <p>Video syncing to Drive...</p>
+                                </div>
+                            </div>
+                        ) : (
+                            // Image: Show directly
+                            <img
+                                src={currentImage.url}
+                                alt={media.title || 'Image'}
+                                className="view-modal-image"
+                                key={currentImageIndex}
+                            />
+                        )
                     ) : (
                         <div className="view-modal-placeholder">
                             <span className="material-icons-round">image</span>
