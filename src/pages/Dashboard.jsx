@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { fetchUserContent, saveUrl } from '../api/urls'
+import { fetchUserContent, saveUrl, deleteUrl } from '../api/urls'
 import { fetchUserUsage } from '../api/auth'
 import Header from '../components/Header'
 import ContentCard from '../components/ContentCard'
@@ -113,6 +113,17 @@ function Dashboard() {
             setResult({ success: false, message: error.message })
         } finally {
             setSaving(false)
+        }
+    }
+
+    const handleDeleteItem = async (contentHash) => {
+        if (!user?.id) return
+        try {
+            await deleteUrl(contentHash, user.id)
+            loadContent()
+        } catch (error) {
+            console.error('Failed to delete item:', error)
+            alert(`Failed to delete: ${error.message}`)
         }
     }
 
@@ -233,6 +244,7 @@ function Dashboard() {
                                     key={item.contentHash || item.id}
                                     item={item}
                                     variant="grid"
+                                    onDelete={handleDeleteItem}
                                 />
                             ))}
                         </div>

@@ -164,6 +164,7 @@
     opacity: 1;
     transform: scale(1);
 }
+
 .content-card.is-viewable:hover .card-view-btn {
     transform: scale(1.05);
 }
@@ -175,6 +176,42 @@
 }
 
 .card-view-btn .material-icons-round {
+    font-size: 18px;
+}
+
+/* Delete Button */
+.card-delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 48px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.2s ease;
+    z-index: 5;
+}
+
+.content-card:hover .card-delete-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.card-delete-btn:hover {
+    background: var(--color-error);
+    color: white;
+    transform: scale(1.1);
+}
+
+.card-delete-btn .material-icons-round {
     font-size: 18px;
 }
 

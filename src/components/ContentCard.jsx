@@ -69,7 +69,7 @@ function getPlatformTag(platform) {
     return tags[platform] || '#MEDIA'
 }
 
-const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, variant = 'grid' }) {
+const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, onDelete, variant = 'grid' }) {
     const media = item.media || {}
     const status = media.downloadStatus
 
@@ -239,6 +239,22 @@ const ContentCard = memo(function ContentCard({ item, isSelected, onSelect, vari
                         title="View"
                     >
                         <span className="material-icons-round">visibility</span>
+                    </button>
+                )}
+
+                {/* Delete button - shown when onDelete prop is provided */}
+                {onDelete && (
+                    <button
+                        className="card-delete-btn"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            if (window.confirm('Remove this item?')) {
+                                onDelete(item.contentHash)
+                            }
+                        }}
+                        title="Delete"
+                    >
+                        <span className="material-icons-round">delete</span>
                     </button>
                 )}
             </div>
