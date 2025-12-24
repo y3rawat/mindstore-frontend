@@ -200,12 +200,14 @@ export default function ViewModal({ media, onClose }) {
                 <div className="view-modal-media">
                     {currentImage ? (
                         currentImage.isVideo && currentImage.driveId ? (
-                            // Video: Use iframe embed for inline playback
-                            <iframe
-                                src={`https://drive.google.com/file/d/${currentImage.driveId}/preview`}
+                            // Video: Use native video element with streaming API
+                            <video
+                                src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/drive/stream/${currentImage.driveId}`}
                                 className="view-modal-video"
-                                allow="autoplay; encrypted-media"
-                                allowFullScreen
+                                controls
+                                autoPlay
+                                playsInline
+                                preload="auto"
                                 title={media.title || 'Video'}
                                 key={currentImageIndex}
                             />
